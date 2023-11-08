@@ -1,11 +1,18 @@
-# qudi-addon-template
-[![License: LGPL v3](https://img.shields.io/badge/License-LGPL%20v3-blue.svg)](https://www.gnu.org/licenses/lgpl-3.0)
+# qudi-ffpc-modules
 
 ---
+A collection of qudi measurement modules originally developed for fiber Fabry-Pérot cavities measurements.
 
-A template repository to create your own pip-installable qudi namespace addon packages.
 
-Replace this README.md with your own projects' readme.
+
+## Installation
+For installation instructions please refer to the
+[iqo-modules installation guide](https://github.com/Ulm-IQO/qudi-iqo-modules/blob/main/docs/installation_guide.md).
+Although it is a different sets of modules, the approach is the same (specific installation instructions will be available soon...)
+
+## More information
+The best starting point for further researching the qudi documentation is the [readme file](https://github.com/Ulm-IQO/qudi-core) of the qudi-core repo.
+
 
 > __WARNING:__
 > 

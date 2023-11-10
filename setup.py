@@ -9,18 +9,24 @@ from setuptools import setup, find_namespace_packages
 # e.g. qudi-core)
 unix_dep = [
     'wheel>=0.37.0',
-    'qudi-core>=1.4.1',
+    'qudi-core>=1.1.0',
     'numpy>=1.21.3',
+    'lmfit==1.0.3',
     'pyqtgraph>=0.13.0',
     'PySide2==5.15.2.1',
+    'PyVISA>=1.12.0',
+    'pyvisa-py>=0.5.3',
 ]
 
 windows_dep = [
     'wheel>=0.37.0',
-    'qudi-core>=1.4.1',
+    'qudi-core>=1.1.0',
     'numpy>=1.21.3',
+    'lmfit==1.0.3',
     'pyqtgraph>=0.13.0',
     'PySide2==5.15.2.1',
+    'PyVISA>=1.12.0',
+    'pyvisa-py>=0.5.3',
 ]
 
 # The version number of this package is derived from the content of the "VERSION" file located in
@@ -47,24 +53,29 @@ with open('README.md', 'r') as file:
 # 6. Make sure your license tag matches the LICENSE (and maybe LICENSE.LESSER) file distributed
 #    with your package (default: GNU Lesser General Public License v3)
 setup(
-    name='qudi-addon-template',  # Choose a custom name
+    name='qudi-ffpc-modules',  # Choose a custom name
     version=version,  # Automatically deduced from "VERSION" file (see above)
-    packages=find_namespace_packages(where='src'),  # This should be enough for 95% of the use-cases
+    packages=find_namespace_packages(where='src', exclude=['qudi.artwork']),  # This should be enough for 95% of the use-cases
     package_dir={'': 'src'},  # same
-    package_data={'': []},  # include data files
-    description='A template package for qudi addons.',  # Meaningful short(!) description
+    package_data={'qudi'    : ['default.cfg'],
+                  'qudi.gui': ['*.ui', '*/*.ui'],
+                  'qudi.artwork.icons': ['*'],
+                  },  # include data files
+    description='A set of qudi modules for FFPC measurements.',  # Meaningful short(!) description
     long_description=long_description,  # Detailed description is taken from "README.md" file
     long_description_content_type='text/markdown',  # Content type of "README.md" file
-    url='https://github.com/Ulm-IQO/qudi-addon-template',  # URL pointing to your project page
+    url='https://github.com/blupgnup/qudi-ffpc.git',  # URL pointing to your project page
     keywords=['qudi',             # Add tags here to be easier found by searches, e.g. on PyPI
               'experiment',
               'measurement',
-              'framework',
+              'ffpc',
               'lab',
               'laboratory',
               'instrumentation',
               'instrument',
-              'modular'
+              'cavities'
+              'Fabry-Pérot'
+              'fiber'
               ],
     license='LGPLv3',  # License tag
     install_requires=windows_dep if sys.platform == 'win32' else unix_dep,  # package dependencies

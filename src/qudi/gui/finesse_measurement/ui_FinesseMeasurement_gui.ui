@@ -549,7 +549,7 @@
    </property>
    <property name="icon">
     <iconset>
-     <normaloff>../../artwork/icons/single.png</normaloff>../../artwork/icons/single.png</iconset>
+     <normaloff>artwork/icons/single.png</normaloff>artwork/icons/single.png</iconset>
    </property>
    <property name="text">
     <string>single</string>
@@ -570,7 +570,7 @@
   <action name="action_save">
    <property name="icon">
     <iconset>
-     <normaloff>../../artwork/icons/document-save.png</normaloff>../../artwork/icons/document-save.png</iconset>
+     <normaloff>artwork/icons/document-save.svg</normaloff>artwork/icons/document-save.svg</iconset>
    </property>
    <property name="text">
     <string>save np array</string>
@@ -579,7 +579,7 @@
   <action name="actionClose">
    <property name="icon">
     <iconset>
-     <normaloff>../../artwork/icons/application-exit.png</normaloff>../../artwork/icons/application-exit.png</iconset>
+     <normaloff>artwork/icons/application-exit.svg</normaloff>artwork/icons/application-exit.svg</iconset>
    </property>
    <property name="text">
     <string>Close</string>
@@ -597,8 +597,8 @@
    </property>
    <property name="icon">
     <iconset>
-     <normaloff>../../artwork/icons/start_stop.png</normaloff>
-     <activeon>../../artwork/icons/stopFit.png</activeon>../../artwork/icons/start_stop.png</iconset>
+     <normaloff>artwork/icons/start-counter.svg</normaloff>
+     <activeon>artwork/icons/stop-counter.svg</activeon>artwork/icons/start-counter.svg</iconset>
    </property>
    <property name="text">
     <string>start</string>
@@ -619,7 +619,7 @@
   <action name="action_open">
    <property name="icon">
     <iconset>
-     <normaloff>../../artwork/icons/document-open.png</normaloff>../../artwork/icons/document-open.png</iconset>
+     <normaloff>artwork/icons/document-open.svgz</normaloff>artwork/icons/document-open.svgz</iconset>
    </property>
    <property name="text">
     <string>change directory</string>
@@ -634,7 +634,7 @@
    </property>
    <property name="icon">
     <iconset>
-     <normaloff>../../artwork/icons/stopFit.png</normaloff>../../artwork/icons/stopFit.png</iconset>
+     <normaloff>artwork/icons/stop-counter.svg</normaloff>artwork/icons/stop-counter.svg</iconset>
    </property>
    <property name="text">
     <string>stop</string>
@@ -646,7 +646,7 @@
   <action name="action_save_as_pdf">
    <property name="icon">
     <iconset>
-     <normaloff>../../artwork/icons/pdf.png</normaloff>../../artwork/icons/pdf.png</iconset>
+     <normaloff>artwork/icons/pdf.png</normaloff>artwork/icons/pdf.png</iconset>
    </property>
    <property name="text">
     <string>save as pdf</string>
@@ -655,7 +655,7 @@
   <action name="actionFit_settings">
    <property name="icon">
     <iconset>
-     <normaloff>../../artwork/icons/configure.png</normaloff>../../artwork/icons/configure.png</iconset>
+     <normaloff>artwork/icons/configure.svg</normaloff>artwork/icons/configure.svg</iconset>
    </property>
    <property name="text">
     <string>&amp;Fit settings</string>
@@ -674,7 +674,7 @@
   <customwidget>
    <class>FitSettingsComboBox</class>
    <extends>QComboBox</extends>
-   <header>qudi.gui.fitsettings</header>
+   <header>qudi.gui.finesse_measurement.fitsettings</header>
   </customwidget>
   <customwidget>
    <class>ScienDSpinBox</class>

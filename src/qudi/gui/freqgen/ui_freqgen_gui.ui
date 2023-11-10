@@ -208,8 +208,8 @@
          </property>
          <property name="icon">
           <iconset>
-           <normaloff>../../artwork/icons/ToggleSwitch_OFF.png</normaloff>
-           <normalon>../../artwork/icons/ToggleSwitch_ON.png</normalon>../../artwork/icons/ToggleSwitch_OFF.png</iconset>
+           <normaloff>artwork/icons/ToggleSwitch_OFF.png</normaloff>
+           <normalon>artwork/icons/ToggleSwitch_ON.png</normalon>artwork/icons/ToggleSwitch_OFF.png</iconset>
          </property>
          <property name="iconSize">
           <size>
@@ -451,8 +451,8 @@
          </property>
          <property name="icon">
           <iconset>
-           <normaloff>../../artwork/icons/ToggleSwitch_OFF.png</normaloff>
-           <normalon>../../artwork/icons/ToggleSwitch_ON.png</normalon>../../artwork/icons/ToggleSwitch_OFF.png</iconset>
+           <normaloff>artwork/icons/ToggleSwitch_OFF.png</normaloff>
+           <normalon>artwork/icons/ToggleSwitch_ON.png</normalon>artwork/icons/ToggleSwitch_OFF.png</iconset>
          </property>
          <property name="iconSize">
           <size>

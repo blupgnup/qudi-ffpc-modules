@@ -117,7 +117,7 @@ class FinesseLogic(LogicBase):
         self.sigUpdateGui.emit()
 
     def get_single_trace(self, channel=1):
-        self.time_axis = self._oscilloscope.get_xaxis(channel)
+        self.time_axis = self._oscilloscope.get_xaxis()
         trace = self._oscilloscope.RunSingle(channel)
         self._current_trace = np.array(trace)
         self.sigUpdateGui.emit()

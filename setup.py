@@ -15,6 +15,7 @@ unix_dep = [
     'pyqtgraph>=0.13.0',
     'PySide2==5.15.2.1',
     'PyVISA>=1.12.0',
+    'pyvisa-py>=0.5.3',
 ]
 
 windows_dep = [
@@ -25,6 +26,7 @@ windows_dep = [
     'pyqtgraph>=0.13.0',
     'PySide2==5.15.2.1',
     'PyVISA>=1.12.0',
+    'pyvisa-py>=0.5.3',
 ]
 
 # The version number of this package is derived from the content of the "VERSION" file located in
@@ -55,8 +57,11 @@ setup(
     version=version,  # Automatically deduced from "VERSION" file (see above)
     packages=find_namespace_packages(where='src', exclude=['qudi.artwork']),  # This should be enough for 95% of the use-cases
     package_dir={'': 'src'},  # same
-    package_data={'': []},  # include data files
-    description='A template package for qudi addons.',  # Meaningful short(!) description
+    package_data={'qudi'    : ['default.cfg'],
+                  'qudi.gui': ['*.ui', '*/*.ui'],
+                  'qudi.artwork.icons': ['*'],
+                  },  # include data files
+    description='A set of qudi modules for FFPC measurements.',  # Meaningful short(!) description
     long_description=long_description,  # Detailed description is taken from "README.md" file
     long_description_content_type='text/markdown',  # Content type of "README.md" file
     url='https://github.com/blupgnup/qudi-ffpc.git',  # URL pointing to your project page

@@ -172,7 +172,7 @@ class FinesseLogic(LogicBase):
         """
         Execute the currently configured fit on the measurement data. Optionally on passed data
         """
-        print("fitting")
+        self.log.info("fitting")
         if (x_data is None) or (y_data is None):
             y_data = self._current_trace
 
@@ -239,8 +239,8 @@ class FinesseLogic(LogicBase):
                 #LOL
                 error_finesse = self.FSR/(self.result_str_dict['FWHM']['value']*self.eom_frequency)*np.std([self.step1_splitting_left , self.step1_splitting_right ]) + self.FSR_error*1e3/Linewidth + self.FSR*1e3/(self.result_str_dict['FWHM']['value']**2*lambda_adjusted_converted_splitting)*self.result_str_dict['FWHM']['error']
 
-                print("lambda1/2 {0} ; {1}",self.step2_lambda1,self.step2_lambda2)
-                print("finnesse calculated from step2 : {0}", finesse)
+                self.log.info("lambda1/2 {0} ; {1}",self.step2_lambda1,self.step2_lambda2)
+                self.log.info("finnesse calculated from step2 : {0}", finesse)
                 return finesse, error_finesse
             else:
                 return 0, 0

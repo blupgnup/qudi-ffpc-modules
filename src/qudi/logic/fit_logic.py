@@ -214,7 +214,6 @@ class FitLogic(LogicBase):
             for name, fit in dfits.items():
                 try:
                     fname = fit['fit_function']
-                    print(fname)
                     new_fit = {'fit_name': fname, 'est_name': fit['estimator'],
                                'make_fit': self.fit_list[dim][fname]['make_fit'],
                                'make_model': self.fit_list[dim][fname]['make_model'],

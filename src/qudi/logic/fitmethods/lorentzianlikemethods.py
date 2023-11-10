@@ -161,7 +161,6 @@ def make_lorentzianwithoutoffset_model(self, prefix=None):
             prefix=prefix)
 
     full_lorentz_model = amplitude_model * lorentz_model
-    print(full_lorentz_model.independent_vars);
     params = full_lorentz_model.make_params()
 
     # introduces a new parameter, which is solely depending on others and which

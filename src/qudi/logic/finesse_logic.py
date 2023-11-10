@@ -172,7 +172,6 @@ class FinesseLogic(LogicBase):
         """
         Execute the currently configured fit on the measurement data. Optionally on passed data
         """
-        self.log.info("fitting")
         if (x_data is None) or (y_data is None):
             y_data = self._current_trace
 

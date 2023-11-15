@@ -549,7 +549,7 @@
    </property>
    <property name="icon">
     <iconset>
-     <normaloff>artwork/icons/single.png</normaloff>artwork/icons/single.png</iconset>
+     <normaloff>icons:single.png</normaloff>icons:single.png</iconset>
    </property>
    <property name="text">
     <string>single</string>
@@ -646,7 +646,7 @@
   <action name="action_save_as_pdf">
    <property name="icon">
     <iconset>
-     <normaloff>artwork/icons/pdf.png</normaloff>artwork/icons/pdf.png</iconset>
+     <normaloff>icons:pdf.png</normaloff>icons:pdf.png</iconset>
    </property>
    <property name="text">
     <string>save as pdf</string>

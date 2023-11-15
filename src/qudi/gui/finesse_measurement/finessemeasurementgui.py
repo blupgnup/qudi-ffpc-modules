@@ -22,6 +22,7 @@ top-level directory of this distribution and at <https://github.com/Ulm-IQO/qudi
 
 import numpy as np
 import os
+import pkg_resources
 import pyqtgraph as pg
 import datetime
 
@@ -42,6 +43,9 @@ class FinesseMainWindow(QtWidgets.QMainWindow):
         this_dir = os.path.dirname(__file__)
         # Get the path to the icons file
         QtCore.QDir.addSearchPath('icons', os.path.join(this_dir, os.pardir, os.pardir, 'artwork/icons'))
+        # Add icons from the qudi-core package under the same alias (module icons will overwrite qudi-core icons as added first)
+        package_path = pkg_resources.resource_filename('qudi.core', '')
+        QtCore.QDir.addSearchPath('icons', os.path.join(package_path, os.pardir, 'artwork/icons'))
         # Get the path to the *.ui file        
         ui_file = os.path.join(this_dir, 'ui_FinesseMeasurement_gui.ui')
 

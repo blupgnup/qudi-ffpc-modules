@@ -570,7 +570,7 @@
   <action name="action_save">
    <property name="icon">
     <iconset>
-     <normaloff>artwork/icons/document-save.svg</normaloff>artwork/icons/document-save.svg</iconset>
+     <normaloff>icons:document-save.svg</normaloff>icons:document-save.svg</iconset>
    </property>
    <property name="text">
     <string>save np array</string>
@@ -579,7 +579,7 @@
   <action name="actionClose">
    <property name="icon">
     <iconset>
-     <normaloff>artwork/icons/application-exit.svg</normaloff>artwork/icons/application-exit.svg</iconset>
+     <normaloff>icons:application-exit.svg</normaloff>icons:application-exit.svg</iconset>
    </property>
    <property name="text">
     <string>Close</string>
@@ -597,8 +597,8 @@
    </property>
    <property name="icon">
     <iconset>
-     <normaloff>artwork/icons/start-counter.svg</normaloff>
-     <activeon>artwork/icons/stop-counter.svg</activeon>artwork/icons/start-counter.svg</iconset>
+     <normaloff>icons:start-counter.svg</normaloff>
+     <activeon>icons:stop-counter.svg</activeon>icons:start-counter.svg</iconset>
    </property>
    <property name="text">
     <string>start</string>
@@ -619,7 +619,7 @@
   <action name="action_open">
    <property name="icon">
     <iconset>
-     <normaloff>artwork/icons/document-open.svgz</normaloff>artwork/icons/document-open.svgz</iconset>
+     <normaloff>icons:document-open.svgz</normaloff>icons:document-open.svgz</iconset>
    </property>
    <property name="text">
     <string>change directory</string>
@@ -634,7 +634,7 @@
    </property>
    <property name="icon">
     <iconset>
-     <normaloff>artwork/icons/stop-counter.svg</normaloff>artwork/icons/stop-counter.svg</iconset>
+     <normaloff>icons:stop-counter.svg</normaloff>icons:stop-counter.svg</iconset>
    </property>
    <property name="text">
     <string>stop</string>
@@ -655,7 +655,7 @@
   <action name="actionFit_settings">
    <property name="icon">
     <iconset>
-     <normaloff>artwork/icons/configure.svg</normaloff>artwork/icons/configure.svg</iconset>
+     <normaloff>icons:configure.svg</normaloff>icons:configure.svg</iconset>
    </property>
    <property name="text">
     <string>&amp;Fit settings</string>

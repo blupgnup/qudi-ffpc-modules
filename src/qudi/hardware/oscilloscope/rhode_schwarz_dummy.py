@@ -33,7 +33,8 @@ class OscilloscopeRS(OscilloscopeInterface):
     _visa_timeout = ConfigOption('visa_timeout', default=1000.)
     _opc_timeout = ConfigOption('opc_timeout', default=3000.)
     _measurement_timing = ConfigOption('measurement_timing', default=300.)
-    _trace_length = 3000
+    _trace_length = 6000
+    _timebase = 20e-6
 
     sig_handle_timer = QtCore.Signal(bool, int)
 
@@ -101,9 +102,14 @@ class OscilloscopeRS(OscilloscopeInterface):
     def RunSingle(self, channel=1):
         """ Generates a dummy trace.
 
-            @return ndarray: _trace_length value ndarray containing random trace
+            @return ndarray: _trace_length value ndarray containing sample trace
         """
-        trace = np.random.standard_cauchy(self._trace_length,)
+        if channel == 1:
+            # Lorentzian peak without sidebands
+            trace = self.gen_trace(self.get_xaxis)
+        else:
+            # Lorentzian peak with sidebands
+            trace = self.gen_trace(self.get_xaxis, sidebands=True)
 
         return trace    
 
@@ -121,6 +127,34 @@ class OscilloscopeRS(OscilloscopeInterface):
         # self._rte.query('*OPC?')
         # recordlength = int(self._rte.query('ACQ:POIN?'))
         # self._rte.query('*OPC?')
-        timebase = 20e-6
-        xaxis = np.linspace(-timebase/2, timebase/2, self._trace_length)
+        xaxis = np.linspace(-self._timebase/2, self._timebase/2, self._trace_length)
         return xaxis
+
+    def gen_trace(self, x, sidebands = False):
+        # Parameters for the generated Lorentzian trace
+        amplitude = 0.2e-6
+        center = 0.0
+        gamma = 0.2e-6
+        noise_level = 2e-3
+    
+        # Retrieving x_values that fit with the timescale
+        x_values = np.linspace(-self._timebase/2, self._timebase/2, self._trace_length)
+        
+        #lorentzian_values = amplitude / np.pi * (gamma / ((x_values - center)**2 + gamma**2))  
+        # It is better to use the physical definition of the Lorentzian as it is the one used for the fit...
+        I = amplitude / (np.pi * gamma)
+        lorentzian_values = I * (gamma**2 / ((x_values - center)**2 + gamma**2))
+
+        # Add random noise
+        noise = np.random.normal(loc=0, scale=noise_level, size=self._trace_length)
+        trace = lorentzian_values + noise
+
+        # If sidebands, adding 20% amplitude sidebands at 15 gammas distance
+        if sidebands:
+            offset = 10 * gamma
+            sideband_1 = 0.1 * I * (gamma**2 / ((x_values - (center + offset))**2 + gamma**2))
+            sideband_2 = 0.1 * I * (gamma**2 / ((x_values - (center - offset))**2 + gamma**2))
+
+            trace = trace + sideband_1 + sideband_2
+
+        return trace

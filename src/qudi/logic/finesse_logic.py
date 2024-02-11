@@ -357,16 +357,18 @@ class FinesseLogic(LogicBase):
         for label in (axes.get_xticklabels() + axes.get_yticklabels()):
             label.set_fontproperties(LabelFontProp)
         axes.tick_params(direction='in', length=5,
-                        bottom=True, top=True, left=True, right=True, pad=10)
+                        bottom=True, top=True, left=True, right=True, pad=10, labelsize=12)
         axes.minorticks_on()
         axes.tick_params(direction='in', which='minor',
                         bottom=True, top=True, left=True, right=True)
+        plt.grid(alpha=0.4)
+        plt.grid(which='minor', alpha=0.1)
 
         plt.locator_params(axis='y', nbins=4)
 
         axes.plot(freq_axis, self._current_trace*1e3, marker="", linewidth=1)
-        axes.set_xlabel('frequency (MHz)'+arbitrary, labelpad=15)
-        axes.set_ylabel('photodiode signal (mV)')
+        axes.set_xlabel('Frequency detuning (MHz)'+arbitrary, labelpad=15)
+        axes.set_ylabel('Photodiode signal (mV)')
         fig.tight_layout(rect=[0,-0.015,1,1.025])
 
         self._save_logic.save_data(data,

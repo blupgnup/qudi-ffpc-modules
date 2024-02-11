@@ -34,8 +34,11 @@ class FrequencyGeneratorWindow(QtWidgets.QMainWindow):
     """ Create the Main Window based on the *.ui file. """
 
     def __init__(self, **kwargs):
-        # Get the path to the *.ui file
+        # Get the file dir path
         this_dir = os.path.dirname(__file__)
+        # Get the path to the icons file
+        QtCore.QDir.addSearchPath('icons', os.path.join(this_dir, os.pardir, os.pardir, 'artwork/icons'))
+        # Get the path to the *.ui file        
         ui_file = os.path.join(this_dir, 'ui_freqgen_gui.ui')
 
         # Load it

@@ -25,6 +25,7 @@ import os
 import pkg_resources
 import pyqtgraph as pg
 import datetime
+import math
 
 from qudi.core.connector import Connector
 from qudi.core.statusvariable import StatusVar
@@ -279,7 +280,10 @@ class FinesseMeasurementGUI(GuiBase):
                     del self.finesse_average[0]
                 self._mw.FinesseValue_Label.setText('<font color={0}>{1:,.1f} ± {2:,.1f}</font>'.format(palette.c4.name(), np.mean(self.finesse_average), np.std(self.finesse_average))) 
         else:
-            self._mw.FinesseValue_Label.setText('<font color={0}>{1:,.1f} ± {2:,.1f}</font>'.format(palette.c4.name(), self._finesse.cavity_finesse, self._finesse.cavity_finesse_error))
+            if math.isinf(self._finesse.cavity_finesse_error):
+                self._mw.FinesseValue_Label.setText('<font color=red>{1:,.1f} ± {2:,.1f}</font>'.format(palette.c4.name(), self._finesse.cavity_finesse, self._finesse.cavity_finesse_error))
+            else:
+                self._mw.FinesseValue_Label.setText('<font color={0}>{1:,.1f} ± {2:,.1f}</font>'.format(palette.c4.name(), self._finesse.cavity_finesse, self._finesse.cavity_finesse_error))
         self._mw.ready_label.setText('<font color=green>ready</font>')
 
 

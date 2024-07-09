@@ -16,6 +16,7 @@ unix_dep = [
     'PySide2==5.15.2.1',
     'PyVISA>=1.12.0',
     'pyvisa-py>=0.5.3',
+    'scipy<=1.10.1',
 ]
 
 windows_dep = [
@@ -27,6 +28,7 @@ windows_dep = [
     'PySide2==5.15.2.1',
     'PyVISA>=1.12.0',
     'pyvisa-py>=0.5.3',
+    'scipy<=1.10.1',
 ]
 
 # The version number of this package is derived from the content of the "VERSION" file located in

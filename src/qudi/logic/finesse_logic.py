@@ -65,10 +65,6 @@ class FinesseLogic(LogicBase):
     sig_fit_updated = QtCore.Signal()
     sig_Parameter_Updated = QtCore.Signal(dict)
 
-    # fit unmatching sidebands
-    step2_lambda1 = 1;
-    step2_lambda2 = 1;
-
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
@@ -218,30 +214,14 @@ class FinesseLogic(LogicBase):
                 error_finesse = np.std([self.result_str_dict['Splitting']['value']/self.result_str_dict['FWHM 0']['value'],
                                        self.result_str_dict['Splitting']['value']/self.result_str_dict['FWHM 1']['value']])
                 return finesse, error_finesse
-            elif fit_function in ['Lorentzian peak with sidebands','unmatching sidbands step1']:
+            elif fit_function in ['Lorentzian peak with sidebands']:
                 Splitting = np.mean([self.result_str_dict['Splitting left']['value'], self.result_str_dict['Splitting right']['value']])
                 self.conversion = self.eom_frequency/(Splitting)
-                if (fit_function in ['unmatching sidbands step1']):
-                    self.step1_converted_splitting = self.conversion;
-                    self.step1_splitting_left = self.result_str_dict['Splitting left']['value']
-                    self.step1_splitting_right = self.result_str_dict['Splitting right']['value']
-
                 Linewidth = self.result_str_dict['FWHM 1']['value']*self.conversion
                 finesse = self.FSR*1e3/Linewidth
                 error_finesse = self.FSR/(self.result_str_dict['FWHM 1']['value']*self.eom_frequency)*np.std([self.result_str_dict['Splitting left']['value'], self.result_str_dict['Splitting right']['value']]) + self.FSR_error*1e3/Linewidth + self.FSR*1e3/(self.result_str_dict['FWHM 1']['value']**2*self.conversion)*self.result_str_dict['FWHM 1']['error']
                 return finesse, error_finesse
-            elif fit_function in ['unmatching sidbands step2']:
-                lambda_adjusted_converted_splitting  = (self.step2_lambda1/self.step2_lambda2)**2 * self.step1_converted_splitting
-                Linewidth = self.result_str_dict['FWHM']['value']*lambda_adjusted_converted_splitting
-                finesse = self.FSR*1e3/Linewidth
 
-            
-                #LOL
-                error_finesse = self.FSR/(self.result_str_dict['FWHM']['value']*self.eom_frequency)*np.std([self.step1_splitting_left , self.step1_splitting_right ]) + self.FSR_error*1e3/Linewidth + self.FSR*1e3/(self.result_str_dict['FWHM']['value']**2*lambda_adjusted_converted_splitting)*self.result_str_dict['FWHM']['error']
-
-                self.log.info("lambda1/2 {0} ; {1}",self.step2_lambda1,self.step2_lambda2)
-                self.log.info("finnesse calculated from step2 : {0}", finesse)
-                return finesse, error_finesse
             else:
                 return 0, 0
         else:
@@ -271,14 +251,6 @@ class FinesseLogic(LogicBase):
             d1['Lorentzian peak with sidebands'] = {
                 'fit_function': 'lorentziantriple',
                 'estimator': 'sidebands'
-                }
-            d1['unmatching sidbands step1'] = {
-                'fit_function': 'lorentziantriple',
-                'estimator': 'sidebands_save'
-                }
-            d1['unmatching sidbands step2'] = {
-                'fit_function': 'lorentzian',
-                'estimator': 'lorentzian_step2'
                 }
             default_fits = OrderedDict()
             default_fits['1d'] = d1

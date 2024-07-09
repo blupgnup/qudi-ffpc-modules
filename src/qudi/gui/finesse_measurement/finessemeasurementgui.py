@@ -154,8 +154,6 @@ class FinesseMeasurementGUI(GuiBase):
         self._mw.doubleSpinBox_ELength.editingFinished.connect(self.update_FSR)
         self._mw.checkBox_isRingCavity.stateChanged.connect(self.update_FSR)
         self._mw.do_fit_PushButton.clicked.connect(self.doFit)
-        self._mw.step2_lambda_1_spinBox.editingFinished.connect(self.update_Lambdas)
-        self._mw.step2_lambda_2_spinBox.editingFinished.connect(self.update_Lambdas)
         self._finesse.sig_fit_updated.connect(self.updateFit, QtCore.Qt.QueuedConnection)
         self._finesse.sig_Parameter_Updated.connect(self.update_parameter,
                                                      QtCore.Qt.QueuedConnection)
@@ -163,8 +161,6 @@ class FinesseMeasurementGUI(GuiBase):
         self._mw.show()
 
         self.record_single_trace()
-
-        self.update_Lambdas();
         return
 
     def __disconnect_internal_signals(self):
@@ -247,13 +243,6 @@ class FinesseMeasurementGUI(GuiBase):
                                              palette.c2.name(), FSR, error))
         #self._mw.FSRValue_Label.setText('{0:,.2f} GHz'.format(FSR))
 
-    #updating the values of lambda1 and lambda2 in the finesse logic
-    #does not redo the calculation of the finesse (you have to fit step 2)
-    #TODO try to redo a finesse calculation after ?
-    @QtCore.Slot()
-    def update_Lambdas(self):
-        self._finesse.step2_lambda1 = self._mw.step2_lambda_1_spinBox.value()
-        self._finesse.step2_lambda2 = self._mw.step2_lambda_2_spinBox.value()
 
     @QtCore.Slot()
     def doFit(self):
@@ -292,11 +281,6 @@ class FinesseMeasurementGUI(GuiBase):
         else:
             self._mw.FinesseValue_Label.setText('<font color={0}>{1:,.1f} ± {2:,.1f}</font>'.format(palette.c4.name(), self._finesse.cavity_finesse, self._finesse.cavity_finesse_error))
         self._mw.ready_label.setText('<font color=green>ready</font>')
-        
-        try:
-            self._mw.saved_step1_value.setText('{0}'.format(self._finesse.step1_converted_splitting))#self._finesse.step1_converted_splitting)
-        except:
-           self._mw.saved_step1_value.setText(">_<")
 
 
 

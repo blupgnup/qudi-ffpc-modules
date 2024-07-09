@@ -356,20 +356,6 @@
        </property>
       </widget>
      </item>
-     <item row="7" column="0">
-      <widget class="QLabel" name="saved_step1">
-       <property name="text">
-        <string>saved splitting converted : </string>
-       </property>
-      </widget>
-      </item> 
-     <item row="7" column="1">
-      <widget class="QLabel" name="saved_step1_value">
-       <property name="text">
-        <string>__</string>
-       </property>
-      </widget>
-      </item> 
       <item row="6" column="0">
       <widget class="QCheckBox" name="checkBox_average">
        <property name="enabled">
@@ -436,53 +422,7 @@
        </property>
       </widget>
      </item>
-     <item row="0" column="2">
-      <widget class="QLabel" name="step2_lambda_1">
-       <property name="text">
-        <string>Lambda 1 :</string>
-       </property>
-      </widget>
-     </item>
      <item row="0" column="3">
-      <widget class="QDoubleSpinBox" name="step2_lambda_1_spinBox">
-       <property name="suffix">
-        <string> µm</string>
-       </property>
-       <property name="maximum">
-        <double>2673</double>
-       </property>
-       <property name="singleStep">
-        <double>21.09</double>
-       </property>
-       <property name="value">
-        <double>1550</double>
-       </property>
-      </widget>
-     </item>
-     <item row="0" column="4">
-      <widget class="QLabel" name="step2_lambda_2">
-       <property name="text">
-        <string>lambda 2 : </string>
-       </property>
-      </widget>
-     </item>
-     <item row="0" column="5">
-      <widget class="QDoubleSpinBox" name="step2_lambda_2_spinBox">
-       <property name="suffix">
-        <string> µm</string>
-       </property>
-       <property name="maximum">
-        <double>2673</double>
-       </property>
-       <property name="singleStep">
-        <double>21.09</double>
-       </property>
-       <property name="value">
-        <double>1625</double>
-       </property>
-      </widget>
-     </item>
-     <item row="1" column="4">
       <widget class="QCheckBox" name="checkBox_isRingCavity">
        <property name="text">
         <string>Ring Cavity</string>

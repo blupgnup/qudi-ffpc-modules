@@ -27,6 +27,7 @@ from xmlrpc.client import Boolean
 from qtpy import QtCore
 from collections import OrderedDict
 import numpy as np
+import math
 import matplotlib.pyplot as plt
 import matplotlib.font_manager as fm
 
@@ -187,9 +188,9 @@ class FinesseLogic(LogicBase):
                     if self.result_str_dict['chi_sqr']['value'] < chi:
                         (self.cavity_finesse, self.cavity_finesse_error) = self.finesse(fit_function)
                     else:
-                        self.log.info("Not conclusive fit, increase Chi threshold or reacquire signal")
-                        self.cavity_finesse = 0
-                        self.cavity_finesse_error = 0
+                        self.log.info("Warning no conclusive fit, increase Chi threshold or reacquire signal")
+                        (self.cavity_finesse, self.cavity_finesse_error) = self.finesse(fit_function)
+                        self.cavity_finesse_error = math.inf
                     self.sig_fit_updated.emit()
                 else:
                     self.fc.set_current_fit(fit_function)
@@ -367,7 +368,7 @@ class FinesseLogic(LogicBase):
         plt.locator_params(axis='y', nbins=4)
 
         axes.plot(freq_axis, self._current_trace*1e3, marker="", linewidth=1)
-        axes.set_xlabel('Frequency detuning (MHz)'+arbitrary, labelpad=15)
+        axes.set_xlabel('Frequency offset (MHz)'+arbitrary, labelpad=15)
         axes.set_ylabel('Photodiode signal (mV)')
         fig.tight_layout(rect=[0,-0.015,1,1.025])
 

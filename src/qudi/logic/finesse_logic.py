@@ -51,6 +51,7 @@ class FinesseLogic(LogicBase):
     cavity_length = StatusVar('cavity_length', 460) # µm
     cavity_error = StatusVar('cavity_error', 0.02) # µm
     is_ring_cavity = Boolean(False)
+    pre_fit = Boolean(False)
     refresh_timing = StatusVar('refresh_timing', 200)
     eom_frequency = StatusVar('eom_frequency', 1004) # MHz
     time_base = StatusVar('time_base', 5e-3)
@@ -164,17 +165,24 @@ class FinesseLogic(LogicBase):
             self.FSR = 299792458/(length*1e3)
             self.FSR_error = 299792458*error/(length**2*1e3)
         return self.FSR, self.FSR_error
+    
+    def pre_fit():
+        return 0
 
-    def do_fit(self, fit_function=None, x_data=None, y_data=None, chi=0.1):
+    def do_fit(self, fit_function=None, x_data=None, y_data=None, chi=0.1, pre_fit=False):
         """
         Execute the currently configured fit on the measurement data. Optionally on passed data
         """
         if (x_data is None) or (y_data is None):
             y_data = self._current_trace
 
+        if pre_fit:
+            self.log.warning("Pre-fit checked, only available for Lorentzian peak with sidebands for now")
+
         if fit_function is not None and isinstance(fit_function, str):
             if fit_function in self.get_fit_functions():
                 if fit_function in ['Lorentzian peak with sidebands']:
+                    self.pre_fit()
                     self.fc.set_current_fit(fit_function)
                     self.cavity_fit_x, self.cavity_fit_y, result = self.fc.do_fit(self.time_axis, y_data)
                     if result is None:

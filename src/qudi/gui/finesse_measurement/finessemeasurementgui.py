@@ -63,7 +63,7 @@ class FinesseMeasurementGUI(GuiBase):
     sigStartAcquisition = QtCore.Signal(int, float)
     sigStopAcquisition = QtCore.Signal()
     sigFitChanged = QtCore.Signal(str)
-    sigDoFit = QtCore.Signal(str, object, object, float)
+    sigDoFit = QtCore.Signal(str, object, object, float, bool)
     sigScopeSettings = QtCore.Signal(float, int, float)
     finesse_average = []
 
@@ -140,6 +140,7 @@ class FinesseMeasurementGUI(GuiBase):
         self._mw.doubleSpinBoxAQT.setValue(self._finesse.time_base*1e3)
         self._mw.refresh_spinBox.setValue(self._finesse.refresh_timing)
         self._mw.doubleSpinBox_EOM.setValue(self._finesse.eom_frequency)
+        self._mw.checkBox_PreFit.setChecked(self._finesse.pre_fit)
 
         # control/values-changed signals to logic
         self.sigSingleAcquisition.connect(self._finesse.get_single_trace)
@@ -250,7 +251,7 @@ class FinesseMeasurementGUI(GuiBase):
         self._mw.ready_label.setText('<font color=red>fitting...</font>')
         fit_function = self._mw.fit_methods_ComboBox.getCurrentFit()[0]
         self.sigFitChanged.emit(fit_function)
-        self.sigDoFit.emit(fit_function, None, None, self._mw.doubleSpinBox_chi.value())
+        self.sigDoFit.emit(fit_function, None, None, self._mw.doubleSpinBox_chi.value(), self._mw.checkBox_PreFit.isChecked())
 
     @QtCore.Slot()
     def updateFit(self):

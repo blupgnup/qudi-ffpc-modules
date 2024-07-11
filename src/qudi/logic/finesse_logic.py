@@ -31,6 +31,10 @@ import math
 import matplotlib.pyplot as plt
 import matplotlib.font_manager as fm
 
+from scipy.signal import find_peaks
+from scipy.signal import butter
+from scipy.signal import filtfilt
+
 from qudi.core.connector import Connector
 from qudi.core.configoption import ConfigOption
 from qudi.core.statusvariable import StatusVar
@@ -51,6 +55,7 @@ class FinesseLogic(LogicBase):
     cavity_length = StatusVar('cavity_length', 460) # µm
     cavity_error = StatusVar('cavity_error', 0.02) # µm
     is_ring_cavity = Boolean(False)
+    pre_fit = Boolean(False)
     refresh_timing = StatusVar('refresh_timing', 200)
     eom_frequency = StatusVar('eom_frequency', 1004) # MHz
     time_base = StatusVar('time_base', 5e-3)
@@ -164,17 +169,82 @@ class FinesseLogic(LogicBase):
             self.FSR = 299792458/(length*1e3)
             self.FSR_error = 299792458*error/(length**2*1e3)
         return self.FSR, self.FSR_error
+    
+    def do_pre_fit(self, x_data, y_data):
+        # Filter the data before peak detection (second order lowpass filter)
+        cutoff = 20 # Cut off frequency
+        nyq = 0.5 * len(y_data)
+        normal_cutoff = cutoff / nyq
+        # Get the filter coefficients 
+        b, a = butter(2, normal_cutoff, btype='low', analog=False)
+        y_filtered = filtfilt(b, a, y_data)
+        
+        # Find peaks on filtered Y signal
+        min_prominence=1
+        peaks, _ = find_peaks(y_filtered, prominence=(0.01, 1))
+        # We want 3 peaks, if less than 3 peaks, we need to reduce min prominence
+        for i in range(10):
+            if len(peaks) < 3:
+                self.log.warning("Reducing prominence.")
+                min_prominence *= 0.1
+                peaks, _ = find_peaks(y_filtered, prominence=(min_prominence, 1))
+        if len(peaks) < 3:
+            self.log.warning("Could not find peaks.")
+            return -1
 
-    def do_fit(self, fit_function=None, x_data=None, y_data=None, chi=0.1):
+        # Update parameters for fit
+        self.fc.fit_list['Lorentzian peak with sidebands']['parameters']['l0_amplitude'].set(value = y_data[peaks[0]])
+        self.fc.fit_list['Lorentzian peak with sidebands']['parameters']['l0_amplitude'].set(min = y_data[peaks[0]] * 0.6)
+        self.fc.fit_list['Lorentzian peak with sidebands']['parameters']['l0_amplitude'].set(max = y_data[peaks[0]] * 1.3)
+        self.fc.fit_list['Lorentzian peak with sidebands']['use_settings']['l0_amplitude']= True
+
+        self.fc.fit_list['Lorentzian peak with sidebands']['parameters']['l0_center'].set(value = x_data[peaks[0]])
+        self.fc.fit_list['Lorentzian peak with sidebands']['parameters']['l0_center'].set(min = x_data[peaks[0]] - 0.2 * abs(x_data[peaks[0]]))
+        self.fc.fit_list['Lorentzian peak with sidebands']['parameters']['l0_center'].set(max = x_data[peaks[0]] + 0.2 * abs(x_data[peaks[0]]))
+        self.fc.fit_list['Lorentzian peak with sidebands']['use_settings']['l0_center'] = True
+
+        self.fc.fit_list['Lorentzian peak with sidebands']['parameters']['l1_amplitude'].set(value = y_data[peaks[1]])
+        self.fc.fit_list['Lorentzian peak with sidebands']['parameters']['l1_amplitude'].set(min = y_data[peaks[1]] * 0.6)
+        self.fc.fit_list['Lorentzian peak with sidebands']['parameters']['l1_amplitude'].set(max = y_data[peaks[1]] * 1.3)
+        self.fc.fit_list['Lorentzian peak with sidebands']['use_settings']['l1_amplitude'] = True
+
+        self.fc.fit_list['Lorentzian peak with sidebands']['parameters']['l1_center'].set(value = x_data[peaks[1]])
+        self.fc.fit_list['Lorentzian peak with sidebands']['parameters']['l1_center'].set(min = x_data[peaks[1]] - 0.2 * abs(x_data[peaks[1]]))
+        self.fc.fit_list['Lorentzian peak with sidebands']['parameters']['l1_center'].set(max = x_data[peaks[1]] + 0.2 * abs(x_data[peaks[1]]))
+        self.fc.fit_list['Lorentzian peak with sidebands']['use_settings']['l1_center'] = True
+
+        self.fc.fit_list['Lorentzian peak with sidebands']['parameters']['l2_amplitude'].set(value = y_data[peaks[2]])
+        self.fc.fit_list['Lorentzian peak with sidebands']['parameters']['l2_amplitude'].set(min = y_data[peaks[2]] * 0.6)
+        self.fc.fit_list['Lorentzian peak with sidebands']['parameters']['l2_amplitude'].set(max = y_data[peaks[2]] * 1.3)
+        self.fc.fit_list['Lorentzian peak with sidebands']['use_settings']['l2_amplitude'] = True
+
+        self.fc.fit_list['Lorentzian peak with sidebands']['parameters']['l2_center'].set(value = x_data[peaks[2]])
+        self.fc.fit_list['Lorentzian peak with sidebands']['parameters']['l2_center'].set(min = x_data[peaks[2]] - 0.2 * abs(x_data[peaks[2]]))
+        self.fc.fit_list['Lorentzian peak with sidebands']['parameters']['l2_center'].set(max = x_data[peaks[2]]  + 0.2 * abs(x_data[peaks[2]]))
+        self.fc.fit_list['Lorentzian peak with sidebands']['use_settings']['l2_center'] = True
+
+        # Log pre-fit success
+        self.log.info("Pre-fit successfull, enjoy!")
+
+        return 0
+
+    def do_fit(self, fit_function=None, x_data=None, y_data=None, chi=0.1, pre_fit=False):
         """
         Execute the currently configured fit on the measurement data. Optionally on passed data
         """
         if (x_data is None) or (y_data is None):
             y_data = self._current_trace
 
+        if pre_fit and fit_function not in ['Lorentzian peak with sidebands']:
+            self.log.warning("Pre-fit checked, only available for Lorentzian peak with sidebands for now")
+
         if fit_function is not None and isinstance(fit_function, str):
             if fit_function in self.get_fit_functions():
                 if fit_function in ['Lorentzian peak with sidebands']:
+                    if pre_fit:
+                        res = self.do_pre_fit(self.time_axis, y_data)
+                        if res < 0:
+                            self.log.warning("Pre-fit failed, fitting as is...")                    
                     self.fc.set_current_fit(fit_function)
                     self.cavity_fit_x, self.cavity_fit_y, result = self.fc.do_fit(self.time_axis, y_data)
                     if result is None:

@@ -31,6 +31,10 @@ import math
 import matplotlib.pyplot as plt
 import matplotlib.font_manager as fm
 
+from scipy.signal import find_peaks
+from scipy.signal import butter
+from scipy.signal import filtfilt
+
 from qudi.core.connector import Connector
 from qudi.core.configoption import ConfigOption
 from qudi.core.statusvariable import StatusVar
@@ -166,7 +170,42 @@ class FinesseLogic(LogicBase):
             self.FSR_error = 299792458*error/(length**2*1e3)
         return self.FSR, self.FSR_error
     
-    def pre_fit():
+    def do_pre_fit(self, x_data, y_data):
+        # Filter the data before peak detection (second order lowpass filter)
+        cutoff = 20 # Cut off frequency
+        nyq = 0.5 * len(y_data)
+        normal_cutoff = cutoff / nyq
+        # Get the filter coefficients 
+        b, a = butter(2, normal_cutoff, btype='low', analog=False)
+        y_filtered = filtfilt(b, a, y_data)
+        
+        # Find peaks on filtered Y signal
+        min_prominence=1
+        peaks, _ = find_peaks(y_filtered, prominence=(0.01, 1))
+        # We want 3 peaks, if less than 3 peaks, we need to reduce min prominence
+        for i in range(10):
+            if len(peaks) < 3:
+                self.log.warning("Reducing prominence.")
+                min_prominence *= 0.1
+                peaks, _ = find_peaks(y_filtered, prominence=(min_prominence, 1))
+        if len(peaks) < 3:
+            self.log.warning("Could not find peaks.")
+            return -1
+
+        self.log.info("Peak 1-X: {0:.2E}, Peak 2-X: {1:.2E}, Peak 3-X: {2:.2E}".format(x_data[peaks[0]], x_data[peaks[1]], x_data[peaks[2]]))
+        self.log.info("Peak 1-Y: {0:.2E}, Peak 2-Y: {1:.2E}, Peak 3-Y: {2:.2E}".format(y_data[peaks[0]], y_data[peaks[1]], y_data[peaks[2]]))
+
+        self.fc.fit_list['Lorentzian peak with sidebands']['parameters']['l0_amplitude'].set(value = x_data[peaks[1]])
+        self.fc.fit_list['Lorentzian peak with sidebands']['parameters']['l0_amplitude'].set(min = x_data[peaks[1]] * 0.9)
+        self.fc.fit_list['Lorentzian peak with sidebands']['parameters']['l0_amplitude'].set(max = x_data[peaks[1]] * 1.1)
+        
+        # Check value after change
+        self.log.info(self.fc.fit_list['Lorentzian peak with sidebands']['parameters']['l0_amplitude'])
+        # Need to retrieve and change parameterUse...
+        #self.log.info(self.fc.fit_list['Lorentzian peak with sidebands']['parameterUse']['l0_amplitude'])
+
+
+
         return 0
 
     def do_fit(self, fit_function=None, x_data=None, y_data=None, chi=0.1, pre_fit=False):
@@ -182,7 +221,10 @@ class FinesseLogic(LogicBase):
         if fit_function is not None and isinstance(fit_function, str):
             if fit_function in self.get_fit_functions():
                 if fit_function in ['Lorentzian peak with sidebands']:
-                    self.pre_fit()
+                    if pre_fit:
+                        res = self.do_pre_fit(self.time_axis, y_data)
+                        if res < 0:
+                            self.log.warning("Pre-fit failed, fitting as is...")                    
                     self.fc.set_current_fit(fit_function)
                     self.cavity_fit_x, self.cavity_fit_y, result = self.fc.do_fit(self.time_axis, y_data)
                     if result is None:

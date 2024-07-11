@@ -1,8 +1,8 @@
 ' Open Windows builtin, Wscript
 Set WshShell = CreateObject("WScript.Shell")
 
-' Run bat file
-WshShell.Run chr(34) & "env\Scripts\qudi.exe" & Chr(34), 0
+' Run Qudi in silent mode (activate Python environment first)
+WshShell.Run "cmd /K env\Scripts\activate & env\Scripts\qudi.exe", 0
 
 ' Hide script command line
 Set WshShell = Nothing

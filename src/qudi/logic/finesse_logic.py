@@ -192,19 +192,39 @@ class FinesseLogic(LogicBase):
             self.log.warning("Could not find peaks.")
             return -1
 
-        self.log.info("Peak 1-X: {0:.2E}, Peak 2-X: {1:.2E}, Peak 3-X: {2:.2E}".format(x_data[peaks[0]], x_data[peaks[1]], x_data[peaks[2]]))
-        self.log.info("Peak 1-Y: {0:.2E}, Peak 2-Y: {1:.2E}, Peak 3-Y: {2:.2E}".format(y_data[peaks[0]], y_data[peaks[1]], y_data[peaks[2]]))
+        # Update parameters for fit
+        self.fc.fit_list['Lorentzian peak with sidebands']['parameters']['l0_amplitude'].set(value = y_data[peaks[0]])
+        self.fc.fit_list['Lorentzian peak with sidebands']['parameters']['l0_amplitude'].set(min = y_data[peaks[0]] * 0.6)
+        self.fc.fit_list['Lorentzian peak with sidebands']['parameters']['l0_amplitude'].set(max = y_data[peaks[0]] * 1.3)
+        self.fc.fit_list['Lorentzian peak with sidebands']['use_settings']['l0_amplitude']= True
 
-        self.fc.fit_list['Lorentzian peak with sidebands']['parameters']['l0_amplitude'].set(value = x_data[peaks[1]])
-        self.fc.fit_list['Lorentzian peak with sidebands']['parameters']['l0_amplitude'].set(min = x_data[peaks[1]] * 0.9)
-        self.fc.fit_list['Lorentzian peak with sidebands']['parameters']['l0_amplitude'].set(max = x_data[peaks[1]] * 1.1)
-        
-        # Check value after change
-        self.log.info(self.fc.fit_list['Lorentzian peak with sidebands']['parameters']['l0_amplitude'])
-        # Need to retrieve and change parameterUse...
-        #self.log.info(self.fc.fit_list['Lorentzian peak with sidebands']['parameterUse']['l0_amplitude'])
+        self.fc.fit_list['Lorentzian peak with sidebands']['parameters']['l0_center'].set(value = x_data[peaks[0]])
+        self.fc.fit_list['Lorentzian peak with sidebands']['parameters']['l0_center'].set(min = x_data[peaks[0]] - 0.2 * abs(x_data[peaks[0]]))
+        self.fc.fit_list['Lorentzian peak with sidebands']['parameters']['l0_center'].set(max = x_data[peaks[0]] + 0.2 * abs(x_data[peaks[0]]))
+        self.fc.fit_list['Lorentzian peak with sidebands']['use_settings']['l0_center'] = True
 
+        self.fc.fit_list['Lorentzian peak with sidebands']['parameters']['l1_amplitude'].set(value = y_data[peaks[1]])
+        self.fc.fit_list['Lorentzian peak with sidebands']['parameters']['l1_amplitude'].set(min = y_data[peaks[1]] * 0.6)
+        self.fc.fit_list['Lorentzian peak with sidebands']['parameters']['l1_amplitude'].set(max = y_data[peaks[1]] * 1.3)
+        self.fc.fit_list['Lorentzian peak with sidebands']['use_settings']['l1_amplitude'] = True
 
+        self.fc.fit_list['Lorentzian peak with sidebands']['parameters']['l1_center'].set(value = x_data[peaks[1]])
+        self.fc.fit_list['Lorentzian peak with sidebands']['parameters']['l1_center'].set(min = x_data[peaks[1]] - 0.2 * abs(x_data[peaks[1]]))
+        self.fc.fit_list['Lorentzian peak with sidebands']['parameters']['l1_center'].set(max = x_data[peaks[1]] + 0.2 * abs(x_data[peaks[1]]))
+        self.fc.fit_list['Lorentzian peak with sidebands']['use_settings']['l1_center'] = True
+
+        self.fc.fit_list['Lorentzian peak with sidebands']['parameters']['l2_amplitude'].set(value = y_data[peaks[2]])
+        self.fc.fit_list['Lorentzian peak with sidebands']['parameters']['l2_amplitude'].set(min = y_data[peaks[2]] * 0.6)
+        self.fc.fit_list['Lorentzian peak with sidebands']['parameters']['l2_amplitude'].set(max = y_data[peaks[2]] * 1.3)
+        self.fc.fit_list['Lorentzian peak with sidebands']['use_settings']['l2_amplitude'] = True
+
+        self.fc.fit_list['Lorentzian peak with sidebands']['parameters']['l2_center'].set(value = x_data[peaks[2]])
+        self.fc.fit_list['Lorentzian peak with sidebands']['parameters']['l2_center'].set(min = x_data[peaks[2]] - 0.2 * abs(x_data[peaks[2]]))
+        self.fc.fit_list['Lorentzian peak with sidebands']['parameters']['l2_center'].set(max = x_data[peaks[2]]  + 0.2 * abs(x_data[peaks[2]]))
+        self.fc.fit_list['Lorentzian peak with sidebands']['use_settings']['l2_center'] = True
+
+        # Log pre-fit success
+        self.log.info("Pre-fit successfull, enjoy!")
 
         return 0
 
@@ -215,7 +235,7 @@ class FinesseLogic(LogicBase):
         if (x_data is None) or (y_data is None):
             y_data = self._current_trace
 
-        if pre_fit:
+        if pre_fit and fit_function not in ['Lorentzian peak with sidebands']:
             self.log.warning("Pre-fit checked, only available for Lorentzian peak with sidebands for now")
 
         if fit_function is not None and isinstance(fit_function, str):

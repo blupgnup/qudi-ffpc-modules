@@ -1084,21 +1084,6 @@ def estimate_lorentziantriple_dip(self, x_axis, data, params,
 
     return error, params
 
-#step1, call estimate_lorentziantriple_sidebands and save the result for later use by the step2
-def estimate_lorentziantriple_sidebands_save(self,x_axis,data,params,threshold_fraction=0.3,minimal_threshold=0.01,sigma_threshold_fraction=0.3):
-    error, params = estimate_lorentziantriple_sidebands(self, x_axis, data, params,threshold_fraction,minimal_threshold,sigma_threshold_fraction)
-    self.log.debug("params for the step1 fit : {0}".format(params))
-    self.step1_params = params;
-    return error, params
-
-        
-def estimate_lorentzian_lorentzian_step2(self, x_axis, data, params):
-
-    #fornow, simple lorenzian fit
-    return estimate_lorentzian_peak(self,x_axis,data,params)
-
-
-
 
 def estimate_lorentziantriple_sidebands(self, x_axis, data, params,
                                         threshold_fraction=0.3,

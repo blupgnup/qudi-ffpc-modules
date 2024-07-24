@@ -168,8 +168,6 @@ class FitLogic(LogicBase):
         self.log.info('Methods were included to FitLogic, but only if naming is right: check the'
                       ' doxygen documentation if you added a new method and it does not show.')
 
-        self.step2_lambda1 = 0
-        self.step2_lambda2 = 0
 
     def on_activate(self):
         """ Initialisation performed during activation of the module.

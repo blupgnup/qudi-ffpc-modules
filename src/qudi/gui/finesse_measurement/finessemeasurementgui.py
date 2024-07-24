@@ -25,6 +25,7 @@ import os
 import pkg_resources
 import pyqtgraph as pg
 import datetime
+import math
 
 from qudi.core.connector import Connector
 from qudi.core.statusvariable import StatusVar
@@ -62,7 +63,7 @@ class FinesseMeasurementGUI(GuiBase):
     sigStartAcquisition = QtCore.Signal(int, float)
     sigStopAcquisition = QtCore.Signal()
     sigFitChanged = QtCore.Signal(str)
-    sigDoFit = QtCore.Signal(str, object, object, float)
+    sigDoFit = QtCore.Signal(str, object, object, float, bool)
     sigScopeSettings = QtCore.Signal(float, int, float)
     finesse_average = []
 
@@ -139,6 +140,7 @@ class FinesseMeasurementGUI(GuiBase):
         self._mw.doubleSpinBoxAQT.setValue(self._finesse.time_base*1e3)
         self._mw.refresh_spinBox.setValue(self._finesse.refresh_timing)
         self._mw.doubleSpinBox_EOM.setValue(self._finesse.eom_frequency)
+        self._mw.checkBox_PreFit.setChecked(self._finesse.pre_fit)
 
         # control/values-changed signals to logic
         self.sigSingleAcquisition.connect(self._finesse.get_single_trace)
@@ -154,8 +156,6 @@ class FinesseMeasurementGUI(GuiBase):
         self._mw.doubleSpinBox_ELength.editingFinished.connect(self.update_FSR)
         self._mw.checkBox_isRingCavity.stateChanged.connect(self.update_FSR)
         self._mw.do_fit_PushButton.clicked.connect(self.doFit)
-        self._mw.step2_lambda_1_spinBox.editingFinished.connect(self.update_Lambdas)
-        self._mw.step2_lambda_2_spinBox.editingFinished.connect(self.update_Lambdas)
         self._finesse.sig_fit_updated.connect(self.updateFit, QtCore.Qt.QueuedConnection)
         self._finesse.sig_Parameter_Updated.connect(self.update_parameter,
                                                      QtCore.Qt.QueuedConnection)
@@ -163,8 +163,6 @@ class FinesseMeasurementGUI(GuiBase):
         self._mw.show()
 
         self.record_single_trace()
-
-        self.update_Lambdas();
         return
 
     def __disconnect_internal_signals(self):
@@ -247,20 +245,13 @@ class FinesseMeasurementGUI(GuiBase):
                                              palette.c2.name(), FSR, error))
         #self._mw.FSRValue_Label.setText('{0:,.2f} GHz'.format(FSR))
 
-    #updating the values of lambda1 and lambda2 in the finesse logic
-    #does not redo the calculation of the finesse (you have to fit step 2)
-    #TODO try to redo a finesse calculation after ?
-    @QtCore.Slot()
-    def update_Lambdas(self):
-        self._finesse.step2_lambda1 = self._mw.step2_lambda_1_spinBox.value()
-        self._finesse.step2_lambda2 = self._mw.step2_lambda_2_spinBox.value()
 
     @QtCore.Slot()
     def doFit(self):
         self._mw.ready_label.setText('<font color=red>fitting...</font>')
         fit_function = self._mw.fit_methods_ComboBox.getCurrentFit()[0]
         self.sigFitChanged.emit(fit_function)
-        self.sigDoFit.emit(fit_function, None, None, self._mw.doubleSpinBox_chi.value())
+        self.sigDoFit.emit(fit_function, None, None, self._mw.doubleSpinBox_chi.value(), self._mw.checkBox_PreFit.isChecked())
 
     @QtCore.Slot()
     def updateFit(self):
@@ -290,13 +281,11 @@ class FinesseMeasurementGUI(GuiBase):
                     del self.finesse_average[0]
                 self._mw.FinesseValue_Label.setText('<font color={0}>{1:,.1f} ± {2:,.1f}</font>'.format(palette.c4.name(), np.mean(self.finesse_average), np.std(self.finesse_average))) 
         else:
-            self._mw.FinesseValue_Label.setText('<font color={0}>{1:,.1f} ± {2:,.1f}</font>'.format(palette.c4.name(), self._finesse.cavity_finesse, self._finesse.cavity_finesse_error))
+            if math.isinf(self._finesse.cavity_finesse_error):
+                self._mw.FinesseValue_Label.setText('<font color=red>{1:,.1f} ± {2:,.1f}</font>'.format(palette.c4.name(), self._finesse.cavity_finesse, self._finesse.cavity_finesse_error))
+            else:
+                self._mw.FinesseValue_Label.setText('<font color={0}>{1:,.1f} ± {2:,.1f}</font>'.format(palette.c4.name(), self._finesse.cavity_finesse, self._finesse.cavity_finesse_error))
         self._mw.ready_label.setText('<font color=green>ready</font>')
-        
-        try:
-            self._mw.saved_step1_value.setText('{0}'.format(self._finesse.step1_converted_splitting))#self._finesse.step1_converted_splitting)
-        except:
-           self._mw.saved_step1_value.setText(">_<")
 
 
 

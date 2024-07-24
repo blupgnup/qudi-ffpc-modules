@@ -27,8 +27,13 @@ from xmlrpc.client import Boolean
 from qtpy import QtCore
 from collections import OrderedDict
 import numpy as np
+import math
 import matplotlib.pyplot as plt
 import matplotlib.font_manager as fm
+
+from scipy.signal import find_peaks
+from scipy.signal import butter
+from scipy.signal import filtfilt
 
 from qudi.core.connector import Connector
 from qudi.core.configoption import ConfigOption
@@ -50,6 +55,7 @@ class FinesseLogic(LogicBase):
     cavity_length = StatusVar('cavity_length', 460) # µm
     cavity_error = StatusVar('cavity_error', 0.02) # µm
     is_ring_cavity = Boolean(False)
+    pre_fit = Boolean(False)
     refresh_timing = StatusVar('refresh_timing', 200)
     eom_frequency = StatusVar('eom_frequency', 1004) # MHz
     time_base = StatusVar('time_base', 5e-3)
@@ -63,10 +69,6 @@ class FinesseLogic(LogicBase):
     sig_handle_timer = QtCore.Signal(bool, int)
     sig_fit_updated = QtCore.Signal()
     sig_Parameter_Updated = QtCore.Signal(dict)
-
-    # fit unmatching sidebands
-    step2_lambda1 = 1;
-    step2_lambda2 = 1;
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -167,17 +169,82 @@ class FinesseLogic(LogicBase):
             self.FSR = 299792458/(length*1e3)
             self.FSR_error = 299792458*error/(length**2*1e3)
         return self.FSR, self.FSR_error
+    
+    def do_pre_fit(self, x_data, y_data):
+        # Filter the data before peak detection (second order lowpass filter)
+        cutoff = 20 # Cut off frequency
+        nyq = 0.5 * len(y_data)
+        normal_cutoff = cutoff / nyq
+        # Get the filter coefficients 
+        b, a = butter(2, normal_cutoff, btype='low', analog=False)
+        y_filtered = filtfilt(b, a, y_data)
+        
+        # Find peaks on filtered Y signal
+        min_prominence=1
+        peaks, _ = find_peaks(y_filtered, prominence=(0.01, 1))
+        # We want 3 peaks, if less than 3 peaks, we need to reduce min prominence
+        for i in range(10):
+            if len(peaks) < 3:
+                self.log.warning("Reducing prominence.")
+                min_prominence *= 0.1
+                peaks, _ = find_peaks(y_filtered, prominence=(min_prominence, 1))
+        if len(peaks) < 3:
+            self.log.warning("Could not find peaks.")
+            return -1
 
-    def do_fit(self, fit_function=None, x_data=None, y_data=None, chi=0.1):
+        # Update parameters for fit
+        self.fc.fit_list['Lorentzian peak with sidebands']['parameters']['l0_amplitude'].set(value = y_data[peaks[0]])
+        self.fc.fit_list['Lorentzian peak with sidebands']['parameters']['l0_amplitude'].set(min = y_data[peaks[0]] * 0.6)
+        self.fc.fit_list['Lorentzian peak with sidebands']['parameters']['l0_amplitude'].set(max = y_data[peaks[0]] * 1.3)
+        self.fc.fit_list['Lorentzian peak with sidebands']['use_settings']['l0_amplitude']= True
+
+        self.fc.fit_list['Lorentzian peak with sidebands']['parameters']['l0_center'].set(value = x_data[peaks[0]])
+        self.fc.fit_list['Lorentzian peak with sidebands']['parameters']['l0_center'].set(min = x_data[peaks[0]] - 0.2 * abs(x_data[peaks[0]]))
+        self.fc.fit_list['Lorentzian peak with sidebands']['parameters']['l0_center'].set(max = x_data[peaks[0]] + 0.2 * abs(x_data[peaks[0]]))
+        self.fc.fit_list['Lorentzian peak with sidebands']['use_settings']['l0_center'] = True
+
+        self.fc.fit_list['Lorentzian peak with sidebands']['parameters']['l1_amplitude'].set(value = y_data[peaks[1]])
+        self.fc.fit_list['Lorentzian peak with sidebands']['parameters']['l1_amplitude'].set(min = y_data[peaks[1]] * 0.6)
+        self.fc.fit_list['Lorentzian peak with sidebands']['parameters']['l1_amplitude'].set(max = y_data[peaks[1]] * 1.3)
+        self.fc.fit_list['Lorentzian peak with sidebands']['use_settings']['l1_amplitude'] = True
+
+        self.fc.fit_list['Lorentzian peak with sidebands']['parameters']['l1_center'].set(value = x_data[peaks[1]])
+        self.fc.fit_list['Lorentzian peak with sidebands']['parameters']['l1_center'].set(min = x_data[peaks[1]] - 0.2 * abs(x_data[peaks[1]]))
+        self.fc.fit_list['Lorentzian peak with sidebands']['parameters']['l1_center'].set(max = x_data[peaks[1]] + 0.2 * abs(x_data[peaks[1]]))
+        self.fc.fit_list['Lorentzian peak with sidebands']['use_settings']['l1_center'] = True
+
+        self.fc.fit_list['Lorentzian peak with sidebands']['parameters']['l2_amplitude'].set(value = y_data[peaks[2]])
+        self.fc.fit_list['Lorentzian peak with sidebands']['parameters']['l2_amplitude'].set(min = y_data[peaks[2]] * 0.6)
+        self.fc.fit_list['Lorentzian peak with sidebands']['parameters']['l2_amplitude'].set(max = y_data[peaks[2]] * 1.3)
+        self.fc.fit_list['Lorentzian peak with sidebands']['use_settings']['l2_amplitude'] = True
+
+        self.fc.fit_list['Lorentzian peak with sidebands']['parameters']['l2_center'].set(value = x_data[peaks[2]])
+        self.fc.fit_list['Lorentzian peak with sidebands']['parameters']['l2_center'].set(min = x_data[peaks[2]] - 0.2 * abs(x_data[peaks[2]]))
+        self.fc.fit_list['Lorentzian peak with sidebands']['parameters']['l2_center'].set(max = x_data[peaks[2]]  + 0.2 * abs(x_data[peaks[2]]))
+        self.fc.fit_list['Lorentzian peak with sidebands']['use_settings']['l2_center'] = True
+
+        # Log pre-fit success
+        self.log.info("Pre-fit successfull, enjoy!")
+
+        return 0
+
+    def do_fit(self, fit_function=None, x_data=None, y_data=None, chi=0.1, pre_fit=False):
         """
         Execute the currently configured fit on the measurement data. Optionally on passed data
         """
         if (x_data is None) or (y_data is None):
             y_data = self._current_trace
 
+        if pre_fit and fit_function not in ['Lorentzian peak with sidebands']:
+            self.log.warning("Pre-fit checked, only available for Lorentzian peak with sidebands for now")
+
         if fit_function is not None and isinstance(fit_function, str):
             if fit_function in self.get_fit_functions():
                 if fit_function in ['Lorentzian peak with sidebands']:
+                    if pre_fit:
+                        res = self.do_pre_fit(self.time_axis, y_data)
+                        if res < 0:
+                            self.log.warning("Pre-fit failed, fitting as is...")                    
                     self.fc.set_current_fit(fit_function)
                     self.cavity_fit_x, self.cavity_fit_y, result = self.fc.do_fit(self.time_axis, y_data)
                     if result is None:
@@ -187,9 +254,9 @@ class FinesseLogic(LogicBase):
                     if self.result_str_dict['chi_sqr']['value'] < chi:
                         (self.cavity_finesse, self.cavity_finesse_error) = self.finesse(fit_function)
                     else:
-                        self.log.info("Not conclusive fit, increase Chi threshold or reacquire signal")
-                        self.cavity_finesse = 0
-                        self.cavity_finesse_error = 0
+                        self.log.info("Warning no conclusive fit, increase Chi threshold or reacquire signal")
+                        (self.cavity_finesse, self.cavity_finesse_error) = self.finesse(fit_function)
+                        self.cavity_finesse_error = math.inf
                     self.sig_fit_updated.emit()
                 else:
                     self.fc.set_current_fit(fit_function)
@@ -217,30 +284,14 @@ class FinesseLogic(LogicBase):
                 error_finesse = np.std([self.result_str_dict['Splitting']['value']/self.result_str_dict['FWHM 0']['value'],
                                        self.result_str_dict['Splitting']['value']/self.result_str_dict['FWHM 1']['value']])
                 return finesse, error_finesse
-            elif fit_function in ['Lorentzian peak with sidebands','unmatching sidbands step1']:
+            elif fit_function in ['Lorentzian peak with sidebands']:
                 Splitting = np.mean([self.result_str_dict['Splitting left']['value'], self.result_str_dict['Splitting right']['value']])
                 self.conversion = self.eom_frequency/(Splitting)
-                if (fit_function in ['unmatching sidbands step1']):
-                    self.step1_converted_splitting = self.conversion;
-                    self.step1_splitting_left = self.result_str_dict['Splitting left']['value']
-                    self.step1_splitting_right = self.result_str_dict['Splitting right']['value']
-
                 Linewidth = self.result_str_dict['FWHM 1']['value']*self.conversion
                 finesse = self.FSR*1e3/Linewidth
                 error_finesse = self.FSR/(self.result_str_dict['FWHM 1']['value']*self.eom_frequency)*np.std([self.result_str_dict['Splitting left']['value'], self.result_str_dict['Splitting right']['value']]) + self.FSR_error*1e3/Linewidth + self.FSR*1e3/(self.result_str_dict['FWHM 1']['value']**2*self.conversion)*self.result_str_dict['FWHM 1']['error']
                 return finesse, error_finesse
-            elif fit_function in ['unmatching sidbands step2']:
-                lambda_adjusted_converted_splitting  = (self.step2_lambda1/self.step2_lambda2)**2 * self.step1_converted_splitting
-                Linewidth = self.result_str_dict['FWHM']['value']*lambda_adjusted_converted_splitting
-                finesse = self.FSR*1e3/Linewidth
 
-            
-                #LOL
-                error_finesse = self.FSR/(self.result_str_dict['FWHM']['value']*self.eom_frequency)*np.std([self.step1_splitting_left , self.step1_splitting_right ]) + self.FSR_error*1e3/Linewidth + self.FSR*1e3/(self.result_str_dict['FWHM']['value']**2*lambda_adjusted_converted_splitting)*self.result_str_dict['FWHM']['error']
-
-                self.log.info("lambda1/2 {0} ; {1}",self.step2_lambda1,self.step2_lambda2)
-                self.log.info("finnesse calculated from step2 : {0}", finesse)
-                return finesse, error_finesse
             else:
                 return 0, 0
         else:
@@ -270,14 +321,6 @@ class FinesseLogic(LogicBase):
             d1['Lorentzian peak with sidebands'] = {
                 'fit_function': 'lorentziantriple',
                 'estimator': 'sidebands'
-                }
-            d1['unmatching sidbands step1'] = {
-                'fit_function': 'lorentziantriple',
-                'estimator': 'sidebands_save'
-                }
-            d1['unmatching sidbands step2'] = {
-                'fit_function': 'lorentzian',
-                'estimator': 'lorentzian_step2'
                 }
             default_fits = OrderedDict()
             default_fits['1d'] = d1
@@ -367,7 +410,7 @@ class FinesseLogic(LogicBase):
         plt.locator_params(axis='y', nbins=4)
 
         axes.plot(freq_axis, self._current_trace*1e3, marker="", linewidth=1)
-        axes.set_xlabel('Frequency detuning (MHz)'+arbitrary, labelpad=15)
+        axes.set_xlabel('Frequency offset (MHz)'+arbitrary, labelpad=15)
         axes.set_ylabel('Photodiode signal (mV)')
         fig.tight_layout(rect=[0,-0.015,1,1.025])
 

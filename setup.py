@@ -9,7 +9,7 @@ from setuptools import setup, find_namespace_packages
 # e.g. qudi-core)
 unix_dep = [
     'wheel>=0.37.0',
-    'qudi-core>=1.1.0',
+    'qudi-core>=1.1.0,<=1.5.1',
     'numpy>=1.21.3',
     'lmfit==1.0.3',
     'pyqtgraph>=0.13.0',

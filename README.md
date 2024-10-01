@@ -6,9 +6,28 @@ A collection of qudi measurement modules originally developed for fiber Fabry-PÃ
 
 
 ## Installation
-For installation instructions please refer to the
-[iqo-modules installation guide](https://github.com/Ulm-IQO/qudi-iqo-modules/blob/main/docs/installation_guide.md).
-Although it is a different sets of modules, the approach is the same (specific installation instructions will be available soon...)
+*Installation has been tested using python 3.9.13*
+
+Create a virtual environment and install qudi-core via pip
+
+    pip install qudi-core
+
+Clone this repo and move into main folder. Then install repo using pip:
+
+    pip install -e .
+
+Install qudi Ipython kernel with the following command:
+
+    qudi-install-kernel
+
+*If not installed by pip during qudi-core installation (missing requirement ?) install qtconsole*
+
+    pip install qtconsole
+
+Update the config file using *default.cfg* file as a base example and run qudi
+
+    qudi
+
 
 ## More information
 The best starting point for further researching the qudi documentation is the [readme file](https://github.com/Ulm-IQO/qudi-core) of the qudi-core repo.

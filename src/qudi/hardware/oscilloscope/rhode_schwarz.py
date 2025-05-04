@@ -76,6 +76,9 @@ class OscilloscopeRS(OscilloscopeInterface):
 
         #locking for thread safety
         self.threadlock = Mutex()
+
+        self.time_base = 5e-3
+        self.record_length = 1000
         
         self._current_trace = []
 
@@ -147,12 +150,37 @@ class OscilloscopeRS(OscilloscopeInterface):
     def SetVerticalScale(self, channel=1, scale=10e-3):
         self._rte.write('CHAN{0}:SCAL {1}'.format(channel, scale))
 
-    def SetTimeBase(self, timebase=5e-3):
-        self._rte.write('TIMebase:RANGe {}'.format(timebase))
+    @property
+    def time_base(self):
+        """ Timebase of the oscilloscope (in milliseconds)
+        Equivalent to the total time of the trace divided by
+        the number of points.
+        """
+        timebase = float(self._rte.query('TIMebase:RANGe?'))
+        self._rte.query('*OPC?')
+        return timebase
+    
+    @time_base.setter
+    def time_base(self, value: float) -> None:
+        """ Setter for property "time_base" 
+        """
+        self._rte.write('TIMebase:RANGe {}'.format(value))
+        self._rte.query('*OPC?')
 
-    def SetRecordLength(self, recordlength=1000):
-        self._rte.write('ACQ:POIN {}'.format(recordlength))
-        sleep(0.1)
+    @property
+    def record_length(self):
+        """ Number of points in the trace.
+        """
+        recordlength = int(self._rte.query('CHAN{}:DATA:POIN?'.format(1)))
+        self._rte.query('*OPC?')
+        return recordlength
+    
+    @record_length.setter
+    def record_length(self, value: int) -> None:
+        """ Setter for property "record_length" 
+        """
+        self._rte.write('ACQ:POIN {}'.format(value))
+        self._rte.query('*OPC?')
 
     def RunSingle(self, channel=1):
         #self._rte.write('RUNSingle')

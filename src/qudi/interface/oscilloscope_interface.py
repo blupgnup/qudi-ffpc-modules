@@ -28,8 +28,64 @@ class OscilloscopeInterface(Base):
     """
     """
 
-    @abstractmethod
-    def getData(self, channel):
-        """ Return a measured value """
+    abstractmethod
+    def get_xaxis(self, channel):
+        """ Return the x-axis of the oscilloscope trace """
         pass
 
+    @abstractmethod
+    def RunSingle(self, channel):
+        """ Run single measurment and return specific channel """
+        pass
+
+    @abstractmethod
+    def RunContinous(self, channel):
+        """ Run continuous measurment and return specific channel """
+        pass
+    
+    @abstractmethod
+    def getData(self, channel):
+        """ Return the last measured value """
+        pass
+
+    @abstractmethod
+    def getData_cont(self, channel):
+        """ Return the last measured value while scope is in continuous mode """
+        pass
+
+    @abstractmethod
+    def SetVerticalScale(self, channel, vertical_scale):
+        """ Sets the vertical scale for the given channel """
+        pass   
+
+    @abstractmethod
+    def RunSTOP(self):
+        """ Stops the oscilloscope and close the connection if necessary """
+        pass
+
+    @property
+    @abstractmethod
+    def time_base(self) -> float:
+        """ Timebase of the oscilloscope (in milliseconds)
+        Equivalent to the total time of the trace divided by the number of points.
+        """
+        pass
+    
+    @time_base.setter
+    def time_base(self, value: int) -> None:
+        """ Setter for property "time_base" 
+        """
+        pass
+
+    @property
+    @abstractmethod
+    def record_length(self) -> int:
+        """ Number of points in the oscilloscope trace 
+        """
+        pass
+    
+    @record_length.setter
+    def record_length(self, value: int) -> None:
+        """ Setter for property "record_length" 
+        """
+        pass

@@ -77,9 +77,6 @@ class OscilloscopeRS(OscilloscopeInterface):
         #locking for thread safety
         self.threadlock = Mutex()
 
-        self.time_base = 5e-3
-        self.record_length = 1000
-        
         self._current_trace = []
 
     def on_activate(self):

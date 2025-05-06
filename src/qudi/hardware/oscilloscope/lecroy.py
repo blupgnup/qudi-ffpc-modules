@@ -384,8 +384,8 @@ class OscilloscopeLecroy(OscilloscopeInterface):
 
         data.close()
 
-        self._current_xaxis = x
-        self._current_trace = y
+        self._current_xaxis = np.array(x)
+        self._current_trace = np.array(y)
 
         return self._current_trace
 

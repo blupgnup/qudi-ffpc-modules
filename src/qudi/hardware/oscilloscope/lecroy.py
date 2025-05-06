@@ -25,7 +25,7 @@ import struct
 import sys
 import re
 import array
-from io import StringIO
+import io
 
 from qtpy import QtCore
 from qudi.core.configoption import ConfigOption
@@ -323,33 +323,27 @@ class OscilloscopeLecroy(OscilloscopeInterface):
             self.log.error("Error: channel must be in " + str(range(1, 5)))
 
         try:
-            self.send("c%s:wf? all" % str(channel))
+            self.send(f"c{channel}:wf? all")
         except Exception as e:
             self.log.error(f"Error sending command: {e}")
 
         try:
-            msg = self.recv()
+            msg_bytes = self.recv()  # raw bytes from the socket
+            msg = msg_bytes.decode('utf-8', errors='ignore')
         except Exception as e:
             self.log.error(f"Error retrieving message: {e}")
-        
-        self.log.info(msg)
-
         if not int(msg[1]) == channel:
             self.log.error("waveforms out of sync.")
 
-        self.log.info("Checkpoint 1")
+        try:
+            startpos = re.search(b'WAVEDESC', msg_bytes).start()
+        except AttributeError:
+            self.log.error("WAVEDESC not found in message.")
 
-        data = StringIO.StringIO()
-        data.write(msg)
-        data.seek(0)
-
-        self.log.info("Checkpoint 1")
-
-        startpos = re.search('WAVEDESC', data.read()).start()
-
-        # set endianess
+        data = io.BytesIO(msg_bytes)
+        # Set endianess
         data.seek(startpos + 34)
-        if struct.unpack('<'+Enum.packfmt, data.read(Enum.length)) == 0:
+        if struct.unpack('<' + Enum.packfmt, data.read(Enum.length))[0] == 0:
             endian = '>'
         else:
             endian = '<'
@@ -360,11 +354,11 @@ class OscilloscopeLecroy(OscilloscopeInterface):
         for name, pos, datatype in wavedesc:
             raw = data.read(datatype.length)
             if datatype in (String, UnitDefinition):
-                var[name] = raw.rstrip('\x00')
+                var[name] = raw.rstrip(b'\x00').decode('utf-8', errors='ignore')
             elif datatype in (TimeStamp,):
-                var[name] = struct.unpack(endian+datatype.packfmt, raw)
+                var[name] = struct.unpack(endian + datatype.packfmt, raw)
             else:
-                var[name] = struct.unpack(endian+datatype.packfmt, raw)[0]
+                var[name] = struct.unpack(endian + datatype.packfmt, raw)[0]
 
         # move to binary data block position
         data.seek(startpos + var['wave_descriptor'] + var['user_text'])
@@ -384,18 +378,14 @@ class OscilloscopeLecroy(OscilloscopeInterface):
 
         for i, pos in enumerate(range(0, nbytes, datatype.length)):
             raw = data.read(datatype.length)
+            yval = struct.unpack(endian + datatype.packfmt, raw)[0]
             x.append(dx * i + xoffset)
-            yval = struct.unpack(endian+datatype.packfmt, raw)[0]
-            y.append(yval *dy - yoffset)
+            y.append(yval * dy - yoffset)
 
         data.close()
 
-        self.log.info("this should be x: %.2", x)
         self._current_xaxis = x
         self._current_trace = y
-
-        self.log.info(x)
-        self.log.info(y)
 
         return self._current_trace
 

@@ -166,8 +166,7 @@ class HardwarePull(QtCore.QObject):
         """
         # update as long as the state is busy
         if self._parentclass.module_state() == 'running':
-            trace = self._parentclass._rte.query_binary_values('FORM REAL,32;:CHAN{}:DATA?'.format(self.channel),
-                                                               datatype='f', is_big_endian=True)
+            trace = self.RunSingle(self.channel)
             # send the data to the parent via a signal
             self.sig_trace.emit(trace)
 
@@ -280,7 +279,8 @@ class OscilloscopeLecroy(OscilloscopeInterface):
         return trace
 
     def RunContinous(self, channel=1, refreshrate=None):
-        self.log.info('Method is not implemented yet for LeCroy scope')
+        self.channel = channel
+        self.log.info('Starting continuous measurment')
         return 0
 
     def SetVerticalScale(self, channel=1, scale=10e-3):

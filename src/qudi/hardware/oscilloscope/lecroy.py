@@ -195,9 +195,12 @@ class OscilloscopeLecroy(OscilloscopeInterface):
             self.sock.settimeout(self._timeout)
             # Open the socket connection to the oscilloscope
             self.sock.connect((self._host, self._port))
+        except socket.timeout:
+            self.log.error('Socket connection timed out.')
+            raise RuntimeError("Failed to connect to hardware")
         except Exception as ex:
-            print('Error initializing the instrument session:\n' + ex.args[0])
-            exit()
+            self.log.error('Error initializing the instrument session:\n' + ex.args[0])
+            raise RuntimeError("Failed to initialize hardware")
         
         self.hardware_thread = QtCore.QThread()
         self._hardware_pull = HardwarePull(self)

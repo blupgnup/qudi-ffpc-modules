@@ -176,6 +176,8 @@ class OscilloscopeLecroy(OscilloscopeInterface):
     _port = ConfigOption('port', default=1861)
     _timeout = ConfigOption('timeout', default=2.0)
     _measurement_timing = ConfigOption('measurement_timing', default=300.)
+    _trace_length = 6000
+    _timebase = 20e-6
 
     sig_handle_timer = QtCore.Signal(bool, int)
 
@@ -296,6 +298,7 @@ class OscilloscopeLecroy(OscilloscopeInterface):
         the number of points.
         """
         timebase = self._current_xaxis[-1] - self._current_xaxis[0] / len(self._current_xaxis)
+        self._timebase = timebase
         return timebase
     
     @time_base.setter
@@ -309,6 +312,7 @@ class OscilloscopeLecroy(OscilloscopeInterface):
         """ Number of points in the trace.
         """
         recordlength = len(self._current_xaxis)
+        self._trace_length = recordlength
         return recordlength
     
     @record_length.setter

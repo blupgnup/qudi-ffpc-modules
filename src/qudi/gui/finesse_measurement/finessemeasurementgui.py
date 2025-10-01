@@ -243,8 +243,9 @@ class FinesseMeasurementGUI(GuiBase):
     @QtCore.Slot()
     def update_FSR(self):
         (FSR, error) = self._finesse.calc_FSR(self._mw.doubleSpinBox_Length.value(), self._mw.doubleSpinBox_ELength.value(), self._mw.checkBox_isRingCavity.isChecked())
-        self._mw.FSRValue_Label.setText('<font color={0}>{1:,.2f} ± {2:,.2f} GHz</font>'.format(
-                                             palette.c2.name(), FSR, error))
+        # Update the Unit based on the FSR value (if >1THz, we don't want to display it in GHz)
+        scale, unit = (1e-3, "THz") if FSR >= 1e3 else (1, "GHz")
+        self._mw.FSRValue_Label.setText('<font color={0}>{1:,.2f} ± {2:,.2f} {3}</font>'.format(palette.c2.name(), FSR * scale, error * scale, unit))
         #self._mw.FSRValue_Label.setText('{0:,.2f} GHz'.format(FSR))
 
 

@@ -269,6 +269,8 @@ class FinesseLogic(LogicBase):
 
                     (self.cavity_finesse, self.cavity_finesse_error) = self.finesse(fit_function)
                     self.sig_fit_updated.emit()
+                self.cavity_linewidth = self.FSR*1e3/self.cavity_finesse
+                self.cavity_linewidth_error = self.cavity_linewidth_error = self.FSR * 1e3 / self.cavity_finesse**2 * self.cavity_finesse_error
             else:
                 self.fc.set_current_fit('No Fit')
                 if fit_function != 'No Fit':

@@ -66,6 +66,7 @@ class FinesseMeasurementGUI(GuiBase):
     sigDoFit = QtCore.Signal(str, object, object, float, bool)
     sigScopeSettings = QtCore.Signal(float, int, float)
     finesse_average = []
+    linewidth_average = []
 
     def on_activate(self):
         """ Definition and initialisation of the GUI plus staring the measurement.
@@ -198,6 +199,7 @@ class FinesseMeasurementGUI(GuiBase):
     def __initialize_layout(self):
         #self._mw.Finesse_Label.setText('<font color={0}>Finesse</font>'.format(palette.c3.name()))
         self._mw.FinesseValue_Label.setText('<font color={0}>0</font>'.format(palette.c4.name()))
+        self._mw.LinewidthValue_Label.setText('<font color={0}>0</font>'.format(palette.c4.name()))
         
         self._pw = self._mw.trace_PlotWidget
         self.plot1 = self._pw.plotItem
@@ -277,14 +279,20 @@ class FinesseMeasurementGUI(GuiBase):
         if self._mw.checkBox_average.isChecked() is True:
             if self._finesse.cavity_finesse > 0:
                 self.finesse_average.append(self._finesse.cavity_finesse)
+                self.linewidth_average.append(self._finesse.cavity_linewidth)
                 if len(self.finesse_average) > self._mw.spinBox_numAverage.value():
                     del self.finesse_average[0]
+                if len(self.linewidth_average) > self._mw.spinBox_numAverage.value():
+                    del self.linewidth_average[0]
                 self._mw.FinesseValue_Label.setText('<font color={0}>{1:,.1f} ± {2:,.1f}</font>'.format(palette.c4.name(), np.mean(self.finesse_average), np.std(self.finesse_average))) 
+                self._mw.LinewidthValue_Label.setText('<font color={0}>{1:,.1f} ± {2:,.1f}</font>'.format(palette.c4.name(), np.mean(self.linewidth_average), np.std(self.linewidth_average))) 
         else:
             if math.isinf(self._finesse.cavity_finesse_error):
                 self._mw.FinesseValue_Label.setText('<font color=red>{1:,.1f} ± {2:,.1f}</font>'.format(palette.c4.name(), self._finesse.cavity_finesse, self._finesse.cavity_finesse_error))
+                self._mw.LinewidthValue_Label.setText('<font color=red>{1:,.1f} ± {2:,.1f} MHz</font>'.format(palette.c4.name(), self._finesse.cavity_linewidth, self._finesse.cavity_linewidth_error))
             else:
                 self._mw.FinesseValue_Label.setText('<font color={0}>{1:,.1f} ± {2:,.1f}</font>'.format(palette.c4.name(), self._finesse.cavity_finesse, self._finesse.cavity_finesse_error))
+                self._mw.LinewidthValue_Label.setText('<font color={0}>{1:,.1f} ± {2:,.1f} MHz</font>'.format(palette.c4.name(), self._finesse.cavity_linewidth, self._finesse.cavity_linewidth_error))
         self._mw.ready_label.setText('<font color=green>ready</font>')
 
 

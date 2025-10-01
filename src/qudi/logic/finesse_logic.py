@@ -119,8 +119,8 @@ class FinesseLogic(LogicBase):
         self.sigUpdateGui.emit()
 
     def get_single_trace(self, channel=1):
-        self.time_axis = self._oscilloscope.get_xaxis()
         trace = self._oscilloscope.RunSingle(channel)
+        self.time_axis = self._oscilloscope.get_xaxis()
         self._current_trace = np.array(trace)
         self.sigUpdateGui.emit()
     
@@ -133,8 +133,8 @@ class FinesseLogic(LogicBase):
         self.timer.start(self.refresh_timing)
 
     def acq_loop(self):
-        self.time_axis = self._oscilloscope.get_xaxis(self.current_channel)
         trace = self._oscilloscope.getData_cont(self.current_channel)
+        self.time_axis = self._oscilloscope.get_xaxis(self.current_channel)
         if len(trace)==0:
             self.time_axis = np.linspace(0, 1, self.record_length)
             trace = np.zeros(self.record_length)

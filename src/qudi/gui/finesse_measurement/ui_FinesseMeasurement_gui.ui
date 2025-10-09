@@ -60,7 +60,38 @@
         </property>
        </widget>
       </item>
+      <item row="0" column="3">
+       <widget class="QLabel" name="LinewidthValue_Label">
+        <property name="font">
+         <font>
+          <pointsize>20</pointsize>
+          <weight>75</weight>
+          <bold>true</bold>
+         </font>
+        </property>
+        <property name="text">
+         <string>0 MHz</string>
+        </property>
+       </widget>
+      </item>
       <item row="0" column="2">
+       <widget class="QLabel" name="Linewidth_Label">
+        <property name="font">
+         <font>
+          <pointsize>20</pointsize>
+          <weight>75</weight>
+          <bold>true</bold>
+         </font>
+        </property>
+        <property name="text">
+         <string>Linewidth:</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="4">
        <widget class="QLabel" name="Finesse_Label">
         <property name="font">
          <font>
@@ -77,7 +108,7 @@
         </property>
        </widget>
       </item>
-      <item row="0" column="3">
+      <item row="0" column="5">
        <widget class="QLabel" name="FinesseValue_Label">
         <property name="font">
          <font>

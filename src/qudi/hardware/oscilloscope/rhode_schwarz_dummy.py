@@ -90,14 +90,31 @@ class OscilloscopeRS(OscilloscopeInterface):
         # self._rte.write('CHAN{0}:SCAL {1}'.format(channel, scale))
         pass
 
-    def SetTimeBase(self, timebase=5e-3):
-        # self._rte.write('TIMebase:RANGe {}'.format(timebase))
-        pass
+    @property
+    def time_base(self):
+        """ Timebase of the oscilloscope (in milliseconds)
+        Equivalent to the total time of the trace divided by
+        the number of points.
+        """
+        return self.timebase
+    
+    @time_base.setter
+    def time_base(self, value: float) -> None:
+        """ Setter for property "time_base" 
+        """
+        self.time_base = value
 
-    def SetRecordLength(self, recordlength=1000):
-        # self._rte.write('ACQ:POIN {}'.format(recordlength))
-        # sleep(0.1)
-        pass
+    @property
+    def record_length(self):
+        """ Number of points in the trace.
+        """
+        return self.recordlength
+    
+    @record_length.setter
+    def record_length(self, value: int) -> None:
+        """ Setter for property "record_length" 
+        """
+        self.record_length = value
 
     def RunSingle(self, channel=1):
         """ Generates a dummy trace.
